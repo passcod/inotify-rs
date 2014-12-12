@@ -91,6 +91,10 @@ bitflags! {
     #[doc = " directory itself and the files within."]
     pub const IN_ACCESS       : uint32_t = 0x00000001;
 
+    #[doc = " Event: File was modified."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur *only* for"]
+    #[doc = " the files within, not the directory itself."]
     pub const IN_MODIFY       : uint32_t = 0x00000002;
 
     #[doc = " Event: Metadata has changed."]
