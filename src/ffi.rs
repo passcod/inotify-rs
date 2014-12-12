@@ -39,209 +39,212 @@ use libc::{
 pub use libc::close;
 pub use libc::read;
 
-/// Flag: Set the FD_CLOEXEC flag
-///
-/// The FD_CLOEXEC flag, or "close-on-exec", changes the
-/// behavior of file descriptor when [execve(2)]'d:
-///
-/// > If the FD_CLOEXEC bit is 0, the file descriptor will
-/// > remain open across an [execve(2)], otherwise it will be
-/// > closed.
-///
-/// See [open(2)] and [fcntl(2)] for details.
-///
-/// [execve(2)]: http://man7.org/linux/man-pages/man2/execve.2.html
-/// [open(2)]: http://man7.org/linux/man-pages/man2/open.2.html
-/// [fcntl(2)]: http://man7.org/linux/man-pages/man2/fcntl.2.html
-pub const IN_CLOEXEC : c_int = 0o2000000;
+bitflags! {
+  flags Mask: c_int {
+    #[doc = " Flag: Set the FD_CLOEXEC flag"]
+    #[doc = " "]
+    #[doc = " The FD_CLOEXEC flag, or 'close-on-exec', changes the"]
+    #[doc = " behavior of file descriptor when [execve(2)]'d:"]
+    #[doc = " "]
+    #[doc = " > If the FD_CLOEXEC bit is 0, the file descriptor will"]
+    #[doc = " > remain open across an [execve(2)], otherwise it will be"]
+    #[doc = " > closed."]
+    #[doc = " "]
+    #[doc = " See [open(2)] and [fcntl(2)] for details."]
+    #[doc = " "]
+    #[doc = " [execve(2)]: http://man7.org/linux/man-pages/man2/execve.2.html"]
+    #[doc = " [open(2)]: http://man7.org/linux/man-pages/man2/open.2.html"]
+    #[doc = " [fcntl(2)]: http://man7.org/linux/man-pages/man2/fcntl.2.html"]
+    pub const IN_CLOEXEC : c_int = 0o2000000;
 
-/// Flag: Set the O_NONBLOCK file status flag
-///
-/// The O_NONBLOCK flag changes the behavior of system
-/// calls when accessing files with mandatory locks:
-///
-/// > By default, both traditional (process-associated) and
-/// > open file description record locks are advisory.  Advisory
-/// > locks are not enforced and are useful only between
-/// > cooperating processes.
-/// >
-/// > Both lock types can also be mandatory. Mandatory locks
-/// > are enforced for all processes. If a process tries to
-/// > perform an incompatible access (e.g., [read(2)] or [write(2)])
-/// > on a file region that has an incompatible mandatory lock,
-/// > then the result depends upon whether the O_NONBLOCK flag
-/// > is enabled for its open file description. If the O_NONBLOCK
-/// > flag is not enabled, then the system call is blocked until
-/// > the lock is removed or converted to a mode that is compatible
-/// > with the access. If the O_NONBLOCK flag is enabled, then the
-/// > system call fails with the error EAGAIN.
-///
-/// See [fcntl(2)] for more details.
-///
-/// [read(2)]:  http://man7.org/linux/man-pages/man2/read.2.html
-/// [write(2)]: http://man7.org/linux/man-pages/man2/write.2.html
-/// [fcntl(2)]: http://man7.org/linux/man-pages/man2/fcntl.2.html
-pub const IN_NONBLOCK: c_int = 0o4000;
+    #[doc = " Flag: Set the O_NONBLOCK file status flag"]
+    #[doc = " "]
+    #[doc = " The O_NONBLOCK flag changes the behavior of system"]
+    #[doc = " calls when accessing files with mandatory locks:"]
+    #[doc = " "]
+    #[doc = " > By default, both traditional (process-associated) and"]
+    #[doc = " > open file description record locks are advisory.  Advisory"]
+    #[doc = " > locks are not enforced and are useful only between"]
+    #[doc = " > cooperating processes."]
+    #[doc = " >"]
+    #[doc = " > Both lock types can also be mandatory. Mandatory locks"]
+    #[doc = " > are enforced for all processes. If a process tries to"]
+    #[doc = " > perform an incompatible access (e.g., [read(2)] or [write(2)])"]
+    #[doc = " > on a file region that has an incompatible mandatory lock,"]
+    #[doc = " > then the result depends upon whether the O_NONBLOCK flag"]
+    #[doc = " > is enabled for its open file description. If the O_NONBLOCK"]
+    #[doc = " > flag is not enabled, then the system call is blocked until"]
+    #[doc = " > the lock is removed or converted to a mode that is compatible"]
+    #[doc = " > with the access. If the O_NONBLOCK flag is enabled, then the"]
+    #[doc = " > system call fails with the error EAGAIN."]
+    #[doc = " "]
+    #[doc = " See [fcntl(2)] for more details."]
+    #[doc = " "]
+    #[doc = " [read(2)]:  http://man7.org/linux/man-pages/man2/read.2.html"]
+    #[doc = " [write(2)]: http://man7.org/linux/man-pages/man2/write.2.html"]
+    #[doc = " [fcntl(2)]: http://man7.org/linux/man-pages/man2/fcntl.2.html"]
+    pub const IN_NONBLOCK: c_int = 0o4000;
 
-/// Event: File was accessed.
-///
-/// When monitoring a directory, the event may occur both for the
-/// directory itself and the files within.
-pub const IN_ACCESS       : uint32_t = 0x00000001;
+    #[doc = " Event: File was accessed."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur both for the"]
+    #[doc = " directory itself and the files within."]
+    pub const IN_ACCESS       : uint32_t = 0x00000001;
 
-pub const IN_MODIFY       : uint32_t = 0x00000002;
+    pub const IN_MODIFY       : uint32_t = 0x00000002;
 
-/// Event: Metadata has changed.
-///
-/// This can include e.g.
-/// - permissions, see [chmod(2)];
-/// - timestamps, see [utimensat(2)];
-/// - extended attributes, see [setxattr(s)];
-/// - link count, see [link(2)] and [unlink(2)];
-/// - user/group, see [chown(2)].
-///
-/// When monitoring a directory, the event may occur both for the
-/// directory itself and the files within.
-///
-/// [chmod(2)]: http://man7.org/linux/man-pages/man2/chmod.2.html
-/// [utimensat(2)]: http://man7.org/linux/man-pages/man2/utimensat.2.html
-/// [setxattr(2)]: http://man7.org/linux/man-pages/man2/utimensat.2.html
-/// [link(2)]: http://man7.org/linux/man-pages/man2/link.2.html
-/// [unlink(2)]: http://man7.org/linux/man-pages/man2/link.2.html
-/// [chown(2)]: http://man7.org/linux/man-pages/man2/link.2.html
-pub const IN_ATTRIB       : uint32_t = 0x00000004;
+    #[doc = " Event: Metadata has changed."]
+    #[doc = " "]
+    #[doc = " This can include e.g."]
+    #[doc = " - permissions, see [chmod(2)];"]
+    #[doc = " - timestamps, see [utimensat(2)];"]
+    #[doc = " - extended attributes, see [setxattr(s)];"]
+    #[doc = " - link count, see [link(2)] and [unlink(2)];"]
+    #[doc = " - user/group, see [chown(2)]."]
+    #[doc = "
+    #[doc = " When monitoring a directory, the event may occur both for the"]
+    #[doc = " directory itself and the files within."]
+    #[doc = "
+    #[doc = " [chmod(2)]: http://man7.org/linux/man-pages/man2/chmod.2.html"]
+    #[doc = " [utimensat(2)]: http://man7.org/linux/man-pages/man2/utimensat.2.html"]
+    #[doc = " [setxattr(2)]: http://man7.org/linux/man-pages/man2/utimensat.2.html"]
+    #[doc = " [link(2)]: http://man7.org/linux/man-pages/man2/link.2.html"]
+    #[doc = " [unlink(2)]: http://man7.org/linux/man-pages/man2/link.2.html"]
+    #[doc = " [chown(2)]: http://man7.org/linux/man-pages/man2/link.2.html"]
+    pub const IN_ATTRIB       : uint32_t = 0x00000004;
 
-/// Event: File opened for writing was closed.
-///
-/// When monitoring a directory, the event may occur both for the
-/// directory itself and the files within.
-pub const IN_CLOSE_WRITE  : uint32_t = 0x00000008;
+    #[doc = " Event: File opened for writing was closed."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur both for the"]
+    #[doc = " directory itself and the files within."]
+    pub const IN_CLOSE_WRITE  : uint32_t = 0x00000008;
 
-/// Event: File not opened for writing was closed.
-///
-/// When monitoring a directory, the event may occur both for the
-/// directory itself and the files within.
-pub const IN_CLOSE_NOWRITE: uint32_t = 0x00000010;
+    #[doc = " Event: File not opened for writing was closed."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur both for the"]
+    #[doc = " directory itself and the files within."]
+    pub const IN_CLOSE_NOWRITE: uint32_t = 0x00000010;
 
-/// Event: File was opened.
-///
-/// When monitoring a directory, the event may occur both for the
-/// directory itself and the files within.
-pub const IN_OPEN         : uint32_t = 0x00000020;
+    #[doc = " Event: File was opened."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur both for the"]
+    #[doc = " directory itself and the files within."]
+    pub const IN_OPEN         : uint32_t = 0x00000020;
 
-/// Event: File or directory was moved away.
-///
-/// When monitoring a directory, the event may occur *only* for
-/// the files within, not the directory itself.
-pub const IN_MOVED_FROM   : uint32_t = 0x00000040;
+    #[doc = " Event: File or directory was moved away."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur *only* for"]
+    #[doc = " the files within, not the directory itself."]
+    pub const IN_MOVED_FROM   : uint32_t = 0x00000040;
 
-/// Event: File or directory was moved in.
-///
-/// When monitoring a directory, the event may occur *only* for
-/// the files within, not the directory itself.
-pub const IN_MOVED_TO     : uint32_t = 0x00000080;
+    #[doc = " Event: File or directory was moved in."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur *only* for"]
+    #[doc = " the files within, not the directory itself."]
+    pub const IN_MOVED_TO     : uint32_t = 0x00000080;
 
-/// Event: File or directory was created.
-///
-/// This may also include hard links, symlinks, and UNIX sockets.
-///
-/// When monitoring a directory, the event may occur *only* for
-/// the files within, not the directory itself.
-pub const IN_CREATE       : uint32_t = 0x00000100;
+    #[doc = " Event: File or directory was created."]
+    #[doc = " "]
+    #[doc = " This may also include hard links, symlinks, and UNIX sockets."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur *only* for"]
+    #[doc = " the files within, not the directory itself."]
+    pub const IN_CREATE       : uint32_t = 0x00000100;
 
-/// Event: File or directory was deleted.
-///
-/// This may also include hard links, symlinks, and UNIX sockets.
-///
-/// When monitoring a directory, the event may occur *only* for
-/// the files within, not the directory itself.
-pub const IN_DELETE       : uint32_t = 0x00000200;
+    #[doc = " Event: File or directory was deleted."]
+    #[doc = " "]
+    #[doc = " This may also include hard links, symlinks, and UNIX sockets."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur *only* for"]
+    #[doc = " the files within, not the directory itself."]
+    pub const IN_DELETE       : uint32_t = 0x00000200;
 
-/// Event: Watched file or directory was deleted.
-///
-/// This may also occur if the object is moved to another
-/// filesystem, since [mv(1)] in effect copies the file to the
-/// other filesystem and then deletes it from the original.
-///
-/// An IN_IGNORED event will subsequently be generated.
-///
-/// [mv(1)]: http://man7.org/linux/man-pages/man1/mv.1.html
-pub const IN_DELETE_SELF  : uint32_t = 0x00000400;
+    #[doc = " Event: Watched file or directory was deleted."]
+    #[doc = " "]
+    #[doc = " This may also occur if the object is moved to another"]
+    #[doc = " filesystem, since [mv(1)] in effect copies the file to the"]
+    #[doc = " other filesystem and then deletes it from the original."]
+    #[doc = " "]
+    #[doc = " An IN_IGNORED event will subsequently be generated."]
+    #[doc = " "]
+    #[doc = " [mv(1)]: http://man7.org/linux/man-pages/man1/mv.1.html"]
+    pub const IN_DELETE_SELF  : uint32_t = 0x00000400;
 
-/// Event: Watched file or directory was moved.
-pub const IN_MOVE_SELF    : uint32_t = 0x00000800;
+    #[doc = " Event: Watched file or directory was moved."]
+    pub const IN_MOVE_SELF    : uint32_t = 0x00000800;
 
-/// Event: File or directory was moved away or in.
-///
-/// When monitoring a directory, the event may occur *only* for
-/// the files within, not the directory itself.
-pub const IN_MOVE : uint32_t = (IN_MOVED_FROM | IN_MOVED_TO);
+    #[doc = " Event: File or directory was moved away or in."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur *only* for"]
+    #[doc = " the files within, not the directory itself."]
+    pub const IN_MOVE : uint32_t = (IN_MOVED_FROM | IN_MOVED_TO);
 
-/// Event: File opened was closed.
-///
-/// When monitoring a directory, the event may occur both for the
-/// directory itself and the files within.
-pub const IN_CLOSE: uint32_t = (IN_CLOSE_WRITE | IN_CLOSE_NOWRITE);
+    #[doc = " Event: File opened was closed."]
+    #[doc = " "]
+    #[doc = " When monitoring a directory, the event may occur both for the"]
+    #[doc = " directory itself and the files within."]
+    pub const IN_CLOSE: uint32_t = (IN_CLOSE_WRITE | IN_CLOSE_NOWRITE);
 
-/// Event: Any event occured.
-pub const IN_ALL_EVENTS: uint32_t = (
-	IN_ACCESS | IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE | IN_CLOSE_NOWRITE
-	| IN_OPEN | IN_MOVED_FROM | IN_MOVED_TO | IN_CREATE | IN_DELETE
-	| IN_DELETE_SELF | IN_MOVE_SELF);
+    #[doc = " Event: Any event occured."]
+    pub const IN_ALL_EVENTS: uint32_t = (
+            IN_ACCESS | IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE | IN_CLOSE_NOWRITE
+            | IN_OPEN | IN_MOVED_FROM | IN_MOVED_TO | IN_CREATE | IN_DELETE
+            | IN_DELETE_SELF | IN_MOVE_SELF);
 
-/// Option: Don't watch children (if self is a directory).
-pub const IN_ONLYDIR    : uint32_t = 0x01000000;
+    #[doc = " Option: Don't watch children (if self is a directory)."]
+    pub const IN_ONLYDIR    : uint32_t = 0x01000000;
 
-/// Option: Don't dereference (if self is a symlink).
-pub const IN_DONT_FOLLOW: uint32_t = 0x02000000;
+    #[doc = " Option: Don't dereference (if self is a symlink)."]
+    pub const IN_DONT_FOLLOW: uint32_t = 0x02000000;
 
-/// Option: Don't watch unlinked children.
-///
-/// > By default, when watching events on the children of a
-/// > directory, events are generated for children even after
-/// > they have been unlinked from the directory.  This can
-/// > result in large numbers of uninteresting events for some
-/// > applications (e.g., if watching /tmp, in which many
-/// > applications create temporary files whose names are
-/// > immediately unlinked).
-/// >
-/// > IN_EXCL_UNLINK changes this behavior, so that events are
-/// > not generated for children after they have been unlinked
-/// > from the watched directory.
-pub const IN_EXCL_UNLINK: uint32_t = 0x04000000;
+    #[doc = " Option: Don't watch unlinked children."]
+    #[doc = " "]
+    #[doc = " > By default, when watching events on the children of a"]
+    #[doc = " > directory, events are generated for children even after"]
+    #[doc = " > they have been unlinked from the directory.  This can"]
+    #[doc = " > result in large numbers of uninteresting events for some"]
+    #[doc = " > applications (e.g., if watching /tmp, in which many"]
+    #[doc = " > applications create temporary files whose names are"]
+    #[doc = " > immediately unlinked)."]
+    #[doc = " > "]
+    #[doc = " > IN_EXCL_UNLINK changes this behavior, so that events are"]
+    #[doc = " > not generated for children after they have been unlinked"]
+    #[doc = " > from the watched directory."]
+    pub const IN_EXCL_UNLINK: uint32_t = 0x04000000;
 
-/// Option: Add events to an existing watch instead of replacing it.
-///
-/// > If a watch instance already exists for the filesystem
-/// > object corresponding to self, add (|) the events to the
-/// > watch mask instead of replacing it.
-pub const IN_MASK_ADD   : uint32_t = 0x20000000;
+    #[doc = " Option: Add events to an existing watch instead of replacing it."]
+    #[doc = " "]
+    #[doc = " > If a watch instance already exists for the filesystem"]
+    #[doc = " > object corresponding to self, add (|) the events to the"]
+    #[doc = " > watch mask instead of replacing it."]
+    pub const IN_MASK_ADD   : uint32_t = 0x20000000;
 
-/// Option: Listen for one event, then remove the watch.
-pub const IN_ONESHOT    : uint32_t = 0x80000000;
+    #[doc = " Option: Listen for one event, then remove the watch."]
+    pub const IN_ONESHOT    : uint32_t = 0x80000000;
 
-/// Info: Subject of this event is a directory.
-pub const IN_ISDIR     : uint32_t = 0x40000000;
+    #[doc = " Info: Subject of this event is a directory."]
+    pub const IN_ISDIR     : uint32_t = 0x40000000;
 
-/// Info: Filesystem containing self was unmounted.
-///
-/// An IN_IGNORED event will subsequently be generated.
-pub const IN_UNMOUNT   : uint32_t = 0x00002000;
+    #[doc = " Info: Filesystem containing self was unmounted."]
+    #[doc = " "]
+    #[doc = " An IN_IGNORED event will subsequently be generated."]
+    pub const IN_UNMOUNT   : uint32_t = 0x00002000;
 
-/// Info: Event queue overflowed.
-pub const IN_Q_OVERFLOW: uint32_t = 0x00004000;
+    #[doc = " Info: Event queue overflowed."]
+    pub const IN_Q_OVERFLOW: uint32_t = 0x00004000;
 
-/// Info: Watch was removed.
-///
-/// This can occur either as a result of `inotify_rm_watch()`,
-/// or because self was deleted or the containing filesystem
-/// was unmounted, or after an IN_ONESHOT watch is complete.
-///
-/// See the BUGS section of [inotify(7)] for more details.
-///
-/// [inotify(7)]: http://man7.org/linux/man-pages/man7/inotify.7.html
-pub const IN_IGNORED   : uint32_t = 0x00008000;
-
+    #[doc = " Info: Watch was removed."]
+    #[doc = " "]
+    #[doc = " This can occur either as a result of `inotify_rm_watch()`,"]
+    #[doc = " or because self was deleted or the containing filesystem"]
+    #[doc = " was unmounted, or after an IN_ONESHOT watch is complete."]
+    #[doc = " "]
+    #[doc = " See the BUGS section of [inotify(7)] for more details."]
+    #[doc = " "]
+    #[doc = " [inotify(7)]: http://man7.org/linux/man-pages/man7/inotify.7.html"]
+    pub const IN_IGNORED   : uint32_t = 0x00008000;
+  }
+}
 
 /// Describes an event.
 ///
